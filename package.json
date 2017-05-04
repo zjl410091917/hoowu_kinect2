@@ -6,7 +6,8 @@
   "private": true,
   "gypfile": true,
   "scripts": {
-    "preinstall": "sh ./scripts/check_env.sh"
+    "preinstall": "sh ./scripts/check_env.sh",
+    "install": "node-gyp rebuild"
   },
   "dependencies": {
     "bindings": "~1.2.1",
