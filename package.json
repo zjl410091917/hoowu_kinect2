@@ -6,7 +6,7 @@
   "private": true,
   "gypfile": true,
   "scripts": {
-    "postinstall": "mkdir test"
+    "preinstall": "sh ./scripts/check_env.sh"
   },
   "dependencies": {
     "bindings": "~1.2.1",
