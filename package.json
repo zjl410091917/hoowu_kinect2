@@ -5,6 +5,9 @@
   "main": "index.js",
   "private": true,
   "gypfile": true,
+  "scripts": {
+    "postinstall": "mkdir test"
+  },
   "dependencies": {
     "bindings": "~1.2.1",
     "nan": "^2.0.0",
