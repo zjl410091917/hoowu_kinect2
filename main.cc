@@ -118,18 +118,18 @@ void TrackerThreadLoop(void *arg)
   {
     usleep(50000);
     openni::VideoFrameRef depthFrame;
-    std::cout << "TrackerThreadLoop1" << std::endl;
+    // std::cout << "TrackerThreadLoop1" << std::endl;
     nite::Status niteRc = m_userTracker.readFrame(&m_userTrackerFrame);
-    std::cout << "TrackerThreadLoop2" << std::endl;
+    // std::cout << "TrackerThreadLoop2" << std::endl;
     if (niteRc != nite::STATUS_OK)
     {
       std::cout << "readFrame failed" << std::endl;
       continue;
     }
     depthFrame = m_userTrackerFrame.getDepthFrame();
-    std::cout << "TrackerThreadLoop3" << std::endl;
+    // std::cout << "TrackerThreadLoop3" << std::endl;
     const nite::Array<nite::UserData> &users = m_userTrackerFrame.getUsers();
-    std::cout << "TrackerThreadLoop4" << std::endl;
+    // std::cout << "TrackerThreadLoop4" << std::endl;
     m_nXRes = depthFrame.getVideoMode().getResolutionX();
     m_nYRes = depthFrame.getVideoMode().getResolutionY();
 

@@ -11,7 +11,10 @@ fi
 #检查NiTE2目录
 
 if [ -d "$NITE2_REDIST64/NiTE2" ];then
-    ln -s $NITE2_REDIST64/NiTE2 $ROOT/NiTE2
+    echo "Link NiTE dir"
+    if [ ! -d "$ROOT/NiTE2" ];then
+        ln -s $NITE2_REDIST64/NiTE2 $ROOT/NiTE2
+    fi    
 else
     echo "No NiTE2 data"
     exit 1

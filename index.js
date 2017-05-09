@@ -1,31 +1,25 @@
 "use strict";
+const nativeKinect2 = require('bindings')('hoowu_kinect2');
+const EventEmitter = require("events").EventEmitter;
 
-const addon = require('bindings')('hoowu_kinect2');
+class Kinect2 extends EventEmitter{
+    constructor(){
+        super();
+    }
 
-let Kinect2 = new addon.Kinect();
-// // let clients = {};
+    open(){
+        return nativeKinect2.open();
+    }
 
-// const Server = require("socket.io");
-// let io = new Server();
-// io.on("connection", (client)=>{
-    
-// });
+    openTracker(){
+        nativeKinect2.openTracker(this.trackerCallback.bind(this));
+    }
 
-
-// io.listen(8000);
-
-
-
-
-if (Kinect2.open()) {
-    setInterval(()=>{
-        let users = Kinect2.checkUserFrame();
-        if(Object.keys(users).length > 0){
-            console.info(users);
-            // io.emit("bodyFrame", users);
-        }
-        console.info(Kinect2.deviceIsValid());       
-    }, 1);
+    trackerCallback(data){
+        this.emit("track", data);
+    }
 }
 
-// module.exports = addon.Kinect;
+
+
+module.exports = Kinect2;
