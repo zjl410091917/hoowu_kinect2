@@ -3,8 +3,7 @@
     {
       "target_name": "hoowu_kinect2",
       "sources": [                     
-          "main.cc",
-          "kinect.cc",
+          "main.cc"
       ],
       "include_dirs": [
         "<!(node -e \"require('nan')\")",
