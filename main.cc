@@ -3,11 +3,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <NiTE.h>
-// #include "kinect.h"
-
-// void InitAll(v8::Local<v8::Object> exports) {
-//   Kinect::Init(exports);
-// }
+#include <signal.h>
 
 using namespace v8;
 
@@ -24,6 +20,7 @@ uv_mutex_t m_mTrackerMutex;
 uv_async_t m_aTrackerAsync;
 uv_thread_t m_tTrackerThread;
 bool m_bTrackerThreadRunning = false;
+bool m_bHasBody = false;
 
 typedef struct
 {
@@ -65,10 +62,11 @@ NAN_METHOD(OpenFunction)
   info.GetReturnValue().Set(true);
 }
 NAN_METHOD(CloseFunction)
-{
-  m_userTracker.destroy();
-  nite::NiTE::shutdown();
-  openni::OpenNI::shutdown();
+{  
+  // pthread_kill(m_tTrackerThread, SIGTERM);
+  m_userTracker.destroy(); 
+  nite::NiTE::shutdown();  
+  openni::OpenNI::shutdown();  
   info.GetReturnValue().Set(true);
 }
 
@@ -78,13 +76,14 @@ NAUV_WORK_CB(TrackerProgress_)
   uv_mutex_lock(&m_mTrackerMutex);
   if (m_pOpenTrackerCallback != NULL)
   {
-    bool flag = false;
+    bool hasNewUserData = false;
+    v8::Local<v8::Object> v8Args = Nan::New<v8::Object>();
     v8::Local<v8::Object> v8Users = Nan::New<v8::Object>();
     for (int i = 0; i < USER_COUNT; ++i)
     {
       if (m_trackUsers[i].userId > 0)
       {
-        flag = true;
+        hasNewUserData = true;
         v8::Local<v8::Object> v8User = Nan::New<v8::Object>();
         Nan::Set(v8User, Nan::New<v8::String>("userId").ToLocalChecked(), Nan::New<v8::Number>(m_trackUsers[i].userId));
         Nan::Set(v8User, Nan::New<v8::String>("massX").ToLocalChecked(), Nan::New<v8::Number>(m_trackUsers[i].massX));
@@ -98,10 +97,22 @@ NAUV_WORK_CB(TrackerProgress_)
         Nan::Set(v8Users, Nan::New<v8::Number>(m_trackUsers[i].userId), v8User);
       }
     }
+    if(hasNewUserData){
+      Nan::Set(v8Args, Nan::New<v8::String>("users").ToLocalChecked(), v8Users);
+    }
 
-    v8::Local<v8::Value> argv[] = {v8Users};
-    if (flag)
+    
+    bool flag = false;
+    if(hasNewUserData != m_bHasBody){
+      m_bHasBody = hasNewUserData;
+      flag = true;
+      Nan::Set(v8Args, Nan::New<v8::String>("hasBody").ToLocalChecked(), Nan::New<v8::Boolean>(m_bHasBody));
+    }
+    
+    //回调js
+    if (hasNewUserData || flag)
     {
+      v8::Local<v8::Value> argv[] = {v8Args};
       m_pOpenTrackerCallback->Call(1, argv);
     }
   }
@@ -113,6 +124,8 @@ void TrackerThreadLoop(void *arg)
   int m_nXRes;
   int m_nYRes;
   float x, y;
+
+  bool hasBody = false;
 
   while (1)
   {
